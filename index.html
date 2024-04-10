@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Peso de Embalagem - </title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #C3D9FF;
+            font-family: Tahoma, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            background-color: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #000;
+            box-shadow: 0 0 10px #000;
+        }
+        .title {
+            background-color: #0A246A;
+            color: #fff;
+            padding: 10px;
+            margin: -20px -20px 20px -20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .btn-primary, .btn-success {
+            background-color: #0A246A;
+            border-color: #0A246A;
+        }
+        .material-list {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">
+            <h2>Calculadora de Peso de Embalagem</h2>
+        </div>
+        <form id="weightCalculator">
+            <div class="form-group">
+                <label for="material">Material</label>
+                <select class="form-control" id="material">
+                    <option value="PE">PE</option>
+                    <option value="PET">PET</option>
+                    <option value="PETMETAL">PET METAL</option>
+                    <option value="PETPVDC">PET PVDC</option>
+                    <option value="BOPP">BOPP</option>
+                    <option value="PP">PP</option>
+                    <option value="NYLON">NYLON</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="thickness">Espessura do Material (microns)</label>
+                <input type="number" class="form-control" id="materialThickness" placeholder="Digite a espessura">
+            </div>
+            <button type="button" class="btn btn-primary mb-2" onclick="addMaterial()">Adicionar Material</button>
+            <div id="materialsList" class="material-list"></div>
+            <hr>
+            <div class="form-group">
+                <label for="width">Largura final (mm)</label>
+                <input type="number" class="form-control" id="width" placeholder="Largura">
+            </div>
+            <div class="form-group">
+                <label for="height">Altura (mm)</label>
+                <input type="number" class="form-control" id="height" placeholder="Altura">
+            </div>
+            <button type="button" class="btn btn-success" onclick="calculateWeight()">Calcular Peso</button>
+            <div class="form-group">
+                <label for="result">Resultado:</label>
+                <input type="text" class="form-control" id="result" readonly>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let materials = [];
+
+        function addMaterial() {
+            const material = document.getElementById('material').value;
+            const thickness = parseFloat(document.getElementById('materialThickness').value);
+            if (thickness > 0) {
+                materials.push({ material, thickness });
+                updateMaterialsList();
+            } else {
+                alert('Por favor, insira uma espessura válida.');
+            }
+        }
+
+        function updateMaterialsList() {
+            const materialsList = document.getElementById('materialsList');
+            materialsList.innerHTML = '<h5>Materiais Adicionados:</h5>';
+            let totalThickness = 0;
+            materials.forEach((m, index) => {
+                totalThickness += m.thickness;
+                materialsList.innerHTML += `<p>${index + 1}. ${m.material} - ${m.thickness} microns</p>`;
+            });
+            materialsList.innerHTML += `<p><strong>Espessura Total:</strong> ${totalThickness} microns</p>`;
+        }
+
+        function calculateWeight() {
+            const width = document.getElementById('width').value / 10; // Convertendo de mm para cm
+            const height = document.getElementById('height').value / 10; // Convertendo de mm para cm
+            let totalThickness = materials.reduce((acc, curr) => acc + curr.thickness, 0) / 10000; // Convertendo de microns para cm e somando
+            const volume = width * height * totalThickness; // Volume em cm³
+
+            let totalWeight = 0;
+            materials.forEach(m => {
+                const materialDensity = {
+                    PE: 0.922,
+                    PET: 1.38,
+                    PETMETAL: 1.40,
+                    PETPVDC: 1.35,
+                    BOPP: 0.91,
+                    PP: 0.905,
+                    NYLON: 1.13
+                }[m.material];
+                const materialVolume = width * height * (m.thickness / 10000);
+                totalWeight += materialVolume * materialDensity;
+            });
+
+            document.getElementById('result').value = `${totalWeight.toFixed(2)} gramas`;
+        }
+    </script>
+</body>
+</html>
